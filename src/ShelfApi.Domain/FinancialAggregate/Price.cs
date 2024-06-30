@@ -1,22 +1,32 @@
 ﻿using ShelfApi.Domain.Common.Extensions;
+using ShelfApi.Domain.ErrorAggregate;
 
 namespace ShelfApi.Domain.FinancialAggregate;
 
 public record Price
 {
-    public Price(decimal value)
-    {
-        Value = value;
-        Validate();
-    }
-
     public decimal Value { get; private set; }
 
     public static Price Zero => new(0);
 
-    private void Validate()
+    public static Price Create(decimal value)
     {
-        ArgumentOutOfRangeException.ThrowIfLessThan(Value, 0);
+        ErrorCode? errorCode = TryCreate(value, out Price price);
+        if (errorCode.HasValue)
+            throw new Ex
+    }
+
+    public static ErrorCode? TryCreate(decimal value, out Price price)
+    {
+        price = new()
+        {
+            Value = value
+        };
+
+        if (value < 0)
+            return ErrorCode.InvalidPrice;
+
+        return null;
     }
 
     public Price GetTax(decimal taxPercentage)
@@ -58,4 +68,10 @@ public record Price
         Price price = new(Math.Round(p1.Value / p2.Value));
         return price;
     }
+
+    public static implicit operator decimal(Price x) => x.Value;
+    public static implicit operator Price(decimal x)
+    {
+        ErrorCode? price = TryParse(x);
+    };
 }

@@ -1,8 +1,9 @@
-﻿using ShelfApi.Domain.FinancialAggregate;
+﻿using MediatR;
+using ShelfApi.Domain.FinancialAggregate;
 
 namespace ShelfApi.Application.ProductApplication;
 
-public class AddProductByAdminCommand : ApiRequest<ProductDto>
+public class AddProductByAdminCommand : IRequest<ResultDto<ProductDto>>
 {
     public string Name { get; set; }
     public Price Price { get; set; }

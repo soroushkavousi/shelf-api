@@ -1,20 +1,16 @@
 ﻿using Mapster;
+using MediatR;
 using ShelfApi.Domain.ProductAggregate;
 
 namespace ShelfApi.Application.ProductApplication;
 
-public class AddProductByAdminCommandHandler : ApiRequestHandler<AddProductByAdminCommand, ProductDto>
+public class AddProductByAdminCommandHandler(IIdManager idManager, IShelfApiDbContext dbContext)
+    : IRequestHandler<AddProductByAdminCommand, ResultDto<ProductDto>>
 {
-    private IShelfApiDbContext _dbContext;
-    private IIdManager _idManager;
+    private IIdManager _idManager = idManager;
+    private IShelfApiDbContext _dbContext = dbContext;
 
-    public AddProductByAdminCommandHandler(IIdManager idManager, IShelfApiDbContext dbContext)
-    {
-        _dbContext = dbContext;
-        _idManager = idManager;
-    }
-
-    protected override async Task<ProductDto> OperateAsync(AddProductByAdminCommand request, CancellationToken cancellationToken)
+    public async Task<ResultDto<ProductDto>> Handle(AddProductByAdminCommand request, CancellationToken cancellationToken)
     {
         ulong id = _idManager.GenerateNextUlong();
         Product product = new(id, request.Name, request.Price, request.Quantity);
@@ -26,4 +22,3 @@ public class AddProductByAdminCommandHandler : ApiRequestHandler<AddProductByAdm
         return product.Adapt<ProductDto>();
     }
 }
-

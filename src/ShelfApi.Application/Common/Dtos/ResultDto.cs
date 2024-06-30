@@ -1,33 +1,51 @@
 ﻿using ShelfApi.Application.ErrorApplication;
+using ShelfApi.Domain.ErrorAggregate;
 
 namespace ShelfApi.Application.Common;
 
 public abstract record ResultDto
 {
-    public List<ErrorDto> Errors { get; protected set; }
-
-    public abstract void SetErrors(List<ErrorDto> errors);
+    public ErrorDto Error { get; set; }
 }
 
 public record ResultDto<TData> : ResultDto
 {
-    public TData Data { get; init; }
-
-    public ResultDto() { }
-
-    private ResultDto(TData data)
+    public ResultDto(ErrorCode errorCode)
     {
+        Error = new(errorCode);
+    }
+
+    public ResultDto(TData data)
+    {
+        if (!EqualityComparer<TData>.Default.Equals(data, default))
+            throw new InvalidOperationException();
+
         Data = data;
     }
 
-    public static ResultDto<TData> Success(TData data)
-        => new(data);
+    public TData Data { get; init; }
 
-    public override void SetErrors(List<ErrorDto> errors)
-    {
-        if (!EqualityComparer<TData>.Default.Equals(Data, default))
-            throw new InvalidOperationException();
-
-        Errors = errors;
-    }
+    public static implicit operator ResultDto<TData>(ErrorCode errorCode) => new(errorCode);
+    public static implicit operator ResultDto<TData>(TData data) => new(data);
 }
+
+//public record ResultDto<TData> : ResultDto
+//{
+//    public ResultDto() { }
+
+//    private ResultDto(TData data)
+//    {
+//        Data = data;
+//    }
+
+//    public static ResultDto<TData> Success(TData data)
+//        => new(data);
+
+//    public override void SetError(ErrorDto error)
+//    {
+//        if (!EqualityComparer<TData>.Default.Equals(Data, default))
+//            throw new InvalidOperationException();
+
+//        Errors = errors;
+//    }
+//}

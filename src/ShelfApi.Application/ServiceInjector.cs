@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using ShelfApi.Application.AuthApplication;
 using ShelfApi.Application.BaseDataApplication.Interfaces;
 using ShelfApi.Application.BaseDataApplication.Services;
-using ShelfApi.Application.ErrorApplication;
+using ShelfApi.Application.Common.Tools.MediatR;
 using System.Reflection;
 
 namespace ShelfApi.Application;
