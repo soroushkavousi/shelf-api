@@ -1,5 +1,4 @@
-﻿using Mapster;
-using MediatR;
+﻿using ShelfApi.Domain.FinancialAggregate;
 using ShelfApi.Domain.ProductAggregate;
 
 namespace ShelfApi.Application.ProductApplication;
@@ -12,8 +11,12 @@ public class AddProductByAdminCommandHandler(IIdManager idManager, IShelfApiDbCo
 
     public async Task<ResultDto<ProductDto>> Handle(AddProductByAdminCommand request, CancellationToken cancellationToken)
     {
+        ErrorCode? errorCode = Price.TryCreate(request.Price, out Price price);
+        if (errorCode.HasValue)
+            return errorCode;
+
         ulong id = _idManager.GenerateNextUlong();
-        Product product = new(id, request.Name, request.Price, request.Quantity);
+        Product product = new(id, request.Name, price, request.Quantity);
 
         _dbContext.Products.Add(product);
 

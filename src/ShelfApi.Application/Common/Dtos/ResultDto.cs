@@ -1,11 +1,8 @@
-﻿using ShelfApi.Application.ErrorApplication;
-using ShelfApi.Domain.ErrorAggregate;
-
-namespace ShelfApi.Application.Common;
+﻿namespace ShelfApi.Application.Common;
 
 public abstract record ResultDto
 {
-    public ErrorDto Error { get; set; }
+    public Error Error { get; set; }
 }
 
 public record ResultDto<TData> : ResultDto
@@ -26,6 +23,7 @@ public record ResultDto<TData> : ResultDto
     public TData Data { get; init; }
 
     public static implicit operator ResultDto<TData>(ErrorCode errorCode) => new(errorCode);
+    public static implicit operator ResultDto<TData>(ErrorCode? errorCode) => new(errorCode.Value);
     public static implicit operator ResultDto<TData>(TData data) => new(data);
 }
 

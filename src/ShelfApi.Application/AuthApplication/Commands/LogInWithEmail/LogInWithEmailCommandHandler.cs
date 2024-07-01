@@ -1,10 +1,9 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using ShelfApi.Application.ErrorApplication;
 using ShelfApi.Domain.UserAggregate;
 
 namespace ShelfApi.Application.AuthApplication;
 
-public class LogInWithEmailCommandHandler : ApiRequestHandler<LogInWithEmailCommand, UserCredentialDto>
+public class LogInWithEmailCommandHandler : IRequestHandler<LogInWithEmailCommand, ResultDto<UserCredentialDto>>
 {
     private readonly UserManager<User> _userManager;
     private readonly TokenService _tokenService;
@@ -16,16 +15,16 @@ public class LogInWithEmailCommandHandler : ApiRequestHandler<LogInWithEmailComm
         _tokenService = tokenService;
     }
 
-    protected override async Task<UserCredentialDto> OperateAsync(LogInWithEmailCommand request, CancellationToken cancellationToken)
+    public async Task<ResultDto<UserCredentialDto>> Handle(LogInWithEmailCommand request, CancellationToken cancellationToken)
     {
-        User user = await _userManager.FindByEmailAsync(request.EmailAddress)
-            ?? throw new NotExistException(ErrorField.EMAIL, request.EmailAddress);
+        User user = await _userManager.FindByEmailAsync(request.EmailAddress);
+        if (user is null)
+            return ErrorCode.AuthenticationError;
 
         if (!await _userManager.CheckPasswordAsync(user, request.Password))
-            throw new InvalidValueException(ErrorField.PASSWORD);
+            return ErrorCode.AuthenticationError;
 
         var userCredential = await _tokenService.GenerateAccessTokenAsync(user);
         return userCredential;
     }
 }
-
